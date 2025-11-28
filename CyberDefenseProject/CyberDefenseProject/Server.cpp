@@ -2,6 +2,7 @@
 #include <iostream>
 #include<string>
 #include <sstream>
+#include "Response.h"
 #include <map>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -105,4 +106,7 @@ void Server::handleClient(int clientSocket)
             }
         }
     }
+
+    Response r(200, "Return from server");
+    send(clientSocket, r.toString().c_str(), r.toString().size(), 0);
 }
