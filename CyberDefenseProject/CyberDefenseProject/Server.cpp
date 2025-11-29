@@ -1,7 +1,6 @@
 #include "Server.h"
 #include <iostream>
 #include<string>
-#include <sstream>
 #include "Response.h"
 #include <map>
 
@@ -73,39 +72,7 @@ void Server::handleClient(int clientSocket)
 {
     char buf[LEN];
     int bytesReceived = recv(clientSocket, buf, LEN, 0);
-    std::string request(buf, bytesReceived);
-    int requestLineEnd_idx = request.find("\r\n");
-
-    std::istringstream iss(request.substr(0, requestLineEnd_idx));
-
-    std::string method, path, version;
-    std::map<std::string, std::string> p_map;
-
-
-    if (iss) iss >> method;
-    if (iss) iss >> path;
-    if (iss) iss >> version;
-
-    if (path.size())
-    {
-        int paramIdxStart = path.find('?');
-
-        if (paramIdxStart != std::string::npos)
-        {
-            std::istringstream queryParam(path.substr(paramIdxStart+1));
-            std::string kv;
-            while (std::getline(queryParam, kv, '&'))
-            {
-                int eqIdx = kv.find('=');
-                if (eqIdx != std::string::npos)
-                {
-                    std::string key = kv.substr(0,eqIdx);
-                    std::string value = kv.substr(eqIdx+1);
-                    p_map[key] = value;
-                }
-            }
-        }
-    }
+    
 
     Response r(200, "Return from server");
     send(clientSocket, r.toString().c_str(), r.toString().size(), 0);
