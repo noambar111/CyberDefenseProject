@@ -10,6 +10,7 @@ ResponseBuilder::ResponseBuilder()
 ResponseBuilder& ResponseBuilder::setVersion(const std::string& version)
 {
     this->m_version = version;
+    return *this;
 }
 
 ResponseBuilder& ResponseBuilder::setStatus(int statusCode)

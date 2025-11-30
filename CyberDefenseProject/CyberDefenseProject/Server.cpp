@@ -72,8 +72,8 @@ void Server::handleClient(int clientSocket)
 {
     char buf[LEN];
     int bytesReceived = recv(clientSocket, buf, LEN, 0);
-    
+    Request req(std::string(buf, bytesReceived));
 
-    Response r(200, "Return from server");
-    send(clientSocket, r.toString().c_str(), r.toString().size(), 0);
+    Response res = m_router.route(req);
+    send(clientSocket, res.toString().c_str(), res.toString().size(), 0);
 }

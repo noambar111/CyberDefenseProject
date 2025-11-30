@@ -1,5 +1,6 @@
 #pragma once
 #include <winsock2.h>
+#include "Router.h"
 
 class Server {
 public:
@@ -10,5 +11,6 @@ private:
     int m_port;
     void handleClient(int clientSocket);
     SOCKET m_serverSocket;
+    Router m_router;
 
 };
