@@ -1,13 +1,16 @@
 #pragma once
 #include <string>
+#include <map>
 
 class Response {
-public:
-    Response(int code, const std::string& body) : m_statusCode(code), m_body(body) {};
-
-    std::string toString() const;
-
+    friend class ResponseBuilder;
 private:
+    std::string m_version;
     int m_statusCode;
+    std::string m_statusText;
+    std::map<std::string, std::string> m_headers;
     std::string m_body;
+
+public:
+    std::string toString() const;
 };

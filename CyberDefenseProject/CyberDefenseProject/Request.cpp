@@ -5,24 +5,20 @@
 Request::Request(const std::string& raw)
 {
     int requestLineEnd_idx = raw.find("\r\n");
-
     std::istringstream iss(raw.substr(0, requestLineEnd_idx));
 
-    std::string method, path, version;
-    std::map<std::string, std::string> p_map;
 
+    if (iss) iss >> this->m_method;
+    if (iss) iss >> this->m_path;
+    if (iss) iss >> this->m_version;
 
-    if (iss) iss >> method;
-    if (iss) iss >> path;
-    if (iss) iss >> version;
-
-    if (path.size())
+    if (m_path.size())
     {
-        int paramIdxStart = path.find('?');
+        int paramIdxStart = m_path.find('?');
 
         if (paramIdxStart != std::string::npos)
         {
-            std::istringstream queryParam(path.substr(paramIdxStart + 1));
+            std::istringstream queryParam(m_path.substr(paramIdxStart + 1));
             std::string kv;
             while (std::getline(queryParam, kv, '&'))
             {
@@ -31,7 +27,7 @@ Request::Request(const std::string& raw)
                 {
                     std::string key = kv.substr(0, eqIdx);
                     std::string value = kv.substr(eqIdx + 1);
-                    p_map[key] = value;
+                    m_params[key] = value;
                 }
             }
         }

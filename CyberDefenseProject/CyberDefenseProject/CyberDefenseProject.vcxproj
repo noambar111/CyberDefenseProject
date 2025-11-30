@@ -105,6 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,6 +134,7 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Request.h" />
     <ClInclude Include="Response.h" />
+    <ClInclude Include="ResponseBuilder.h" />
     <ClInclude Include="Router.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>
@@ -140,6 +142,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Request.cpp" />
     <ClCompile Include="Response.cpp" />
+    <ClCompile Include="ResponseBuilder.cpp" />
     <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
