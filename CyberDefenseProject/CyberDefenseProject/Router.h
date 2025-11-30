@@ -8,6 +8,7 @@
 class Router
 {
 public:
+    Router();
     void addRoute(const std::string& path, std::unique_ptr<IHandler> handler);
     Response route(const Request& req);
 

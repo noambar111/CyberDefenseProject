@@ -130,7 +130,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="GeoIPHandler.h" />
-    <ClInclude Include="GeoIPService.h" />
     <ClInclude Include="IHandler.h" />
     <ClInclude Include="IPDatabase.h" />
     <ClInclude Include="IPsByCountryHandler.h" />
@@ -140,6 +139,7 @@
     <ClInclude Include="ResponseBuilder.h" />
     <ClInclude Include="Router.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="TopCountriesHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeoIPHandler.cpp" />
@@ -150,6 +150,7 @@
     <ClCompile Include="ResponseBuilder.cpp" />
     <ClCompile Include="Router.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="TopCountriesHandler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
