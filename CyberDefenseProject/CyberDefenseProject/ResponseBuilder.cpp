@@ -2,17 +2,27 @@
 
 ResponseBuilder::ResponseBuilder()
 {
-    
+    m_version = "HTTP/1.1";
+    m_statusCode = 200;
+    m_statusText = "OK";
 }
 
 ResponseBuilder& ResponseBuilder::setVersion(const std::string& version)
 {
-    // TODO: insert return statement here
+    this->m_version = version;
 }
 
 ResponseBuilder& ResponseBuilder::setStatus(int statusCode)
 {
     this->m_statusCode = statusCode;
+    switch (statusCode)
+    {
+        case 200: m_statusText = "OK"; break;
+        case 400: m_statusText = "Bad Request"; break;
+        case 404: m_statusText = "Not Found"; break;
+        case 500: m_statusText = "Internal Server Error"; break;
+        default: m_statusText = "Unknown";  break;
+    }
     return *this;
 }
 
@@ -34,4 +44,7 @@ Response ResponseBuilder::build() const
     res.m_body = this->m_body;
     res.m_headers = this->m_headers;
     res.m_statusCode = this->m_statusCode;
+    res.m_statusText = this->m_statusText;
+    res.m_version = this->m_version;
+    return res;
 }

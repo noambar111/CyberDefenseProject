@@ -39,6 +39,12 @@
     <ClInclude Include="ResponseBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoIPHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -54,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResponseBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Router.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoIPHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
