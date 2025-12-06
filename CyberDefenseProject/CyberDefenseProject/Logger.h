@@ -8,10 +8,10 @@
 #include <iostream>
 
 enum class LogLevel {
-	INFO,
-	WARNING,
-	ERROR,
-	DEBUG
+	INFO_LOG,
+	WARNING_LOG,
+	ERROR_LOG,
+	DEBUG_LOG
 };
 
 class Logger 
@@ -20,7 +20,7 @@ public:
 	static Logger& getInstance();
 	void log(LogLevel level, const std::string& message);
 private:
-	Logger();
+	Logger() {}
 	Logger(const Logger&) = delete;
 	Logger& operator=(const Logger&) = delete;
 	std::string getTimestamp();

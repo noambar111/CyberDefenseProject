@@ -13,10 +13,10 @@ void Logger::log(LogLevel level, const std::string& message)
 
     switch (level)
     {
-    case LogLevel::INFO: lvl = "INFO"; break;
-    case LogLevel::WARNING: lvl = "WARNING"; break;
-    case LogLevel::ERROR: lvl = "ERROR"; break;
-    case LogLevel::DEBUG: lvl = "DEBUG"; break;
+    case LogLevel::INFO_LOG: lvl = "INFO"; break;
+    case LogLevel::WARNING_LOG: lvl = "WARNING"; break;
+    case LogLevel::ERROR_LOG: lvl = "ERROR"; break;
+    case LogLevel::DEBUG_LOG: lvl = "DEBUG"; break;
     }
 
     std::string line = ts + " [" + lvl + "] " + message;
@@ -34,7 +34,8 @@ std::string Logger::getTimestamp()
     auto now = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(now);
 
-    std::tm local = *std::localtime(&t);
+    std::tm local{};
+    localtime_s(&local, &t);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         now.time_since_epoch()
         ) % 1000;

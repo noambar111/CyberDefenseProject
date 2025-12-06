@@ -51,7 +51,7 @@ void Server::start()
     }
 
     std::cout << "Server is running on port " << m_port << "..." << std::endl;
-    Logger::getInstance().log(LogLevel::INFO, "Server starting on port " + std::to_string(m_port));
+    Logger::getInstance().log(LogLevel::INFO_LOG, "Server starting on port " + std::to_string(m_port));
 
     while (true)
     {
@@ -63,7 +63,7 @@ void Server::start()
         }
         else
         {
-            Logger::getInstance().log(LogLevel::INFO, "Client connected");
+            Logger::getInstance().log(LogLevel::INFO_LOG, "Client connected");
             handleClient(client);
             closesocket(client);
         }
@@ -80,5 +80,8 @@ void Server::handleClient(int clientSocket)
     Request req(std::string(buf, bytesReceived));
 
     Response res = m_router.route(req);
+
+    Logger::getInstance().log(LogLevel::INFO_LOG,
+        "Response sent to client (" + std::to_string(res.toString().size()) + " bytes)");
     send(clientSocket, res.toString().c_str(), res.toString().size(), 0);
 }
