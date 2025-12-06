@@ -6,7 +6,7 @@
 
 Router::Router()
 {
-	addRoute("/geoip", std::make_unique<GepIPHandler>());
+	addRoute("/geo", std::make_unique<GepIPHandler>());
 	addRoute("/countries_to_ip", std::make_unique<IPsByCountryHandler>());
 	addRoute("/top_countries", std::make_unique<TopCountriesHandler>());
 }

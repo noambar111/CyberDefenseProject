@@ -31,5 +31,7 @@ Request::Request(const std::string& raw)
                 }
             }
         }
+        m_path = m_path.substr(0, paramIdxStart);
     }
+    
 }
