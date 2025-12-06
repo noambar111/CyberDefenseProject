@@ -51,7 +51,7 @@ void Server::start()
     }
 
     std::cout << "Server is running on port " << m_port << "..." << std::endl;
-    Logger::
+    Logger::getInstance().log(LogLevel::INFO, "Server starting on port " + std::to_string(m_port));
 
     while (true)
     {
@@ -61,8 +61,12 @@ void Server::start()
             std::cerr << "Accept failed. Error: " << WSAGetLastError() << std::endl;
             continue;
         }
-        handleClient(client);
-        closesocket(client);
+        else
+        {
+            Logger::getInstance().log(LogLevel::INFO, "Client connected");
+            handleClient(client);
+            closesocket(client);
+        }
     }
 
     closesocket(m_serverSocket);
