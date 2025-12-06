@@ -51,6 +51,7 @@ void Server::start()
     }
 
     std::cout << "Server is running on port " << m_port << "..." << std::endl;
+    Logger::
 
     while (true)
     {

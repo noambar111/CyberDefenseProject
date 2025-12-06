@@ -1,6 +1,7 @@
 #pragma once
 #include <winsock2.h>
 #include "Router.h"
+#include "Logger.h"
 
 class Server {
 public:
