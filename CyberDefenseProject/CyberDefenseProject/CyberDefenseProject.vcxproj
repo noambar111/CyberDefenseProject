@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DatabaseManager.h" />
     <ClInclude Include="GeoIPHandler.h" />
     <ClInclude Include="IDatabase.h" />
     <ClInclude Include="Logger.h" />
@@ -145,6 +146,7 @@
     <ClInclude Include="TopCountriesHandler.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DatabaseManager.cpp" />
     <ClCompile Include="GeoIPHandler.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="IPsByCountryHandler.cpp" />

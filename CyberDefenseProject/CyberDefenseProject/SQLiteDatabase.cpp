@@ -60,11 +60,42 @@ std::vector<std::string> SQLiteDatabase::getIPsByCountry(const std::string& coun
 	const char* sql = "SELECT ip FROM geo_records WHERE country = ? ORDER BY id DESC;";
 	sqlite3_stmt* stmt;
 	sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+	sqlite3_bind_text(stmt, 1, country.c_str(), -1, SQLITE_TRANSIENT);
+	std::vector<std::string> results;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		results.push_back((const char*)sqlite3_column_text(stmt, 0));
+	}
+
+	sqlite3_finalize(stmt);
+	return results;
+
 }
 
 std::vector<std::pair<std::string, int>> SQLiteDatabase::getTopCountries(int limit)
 {
-	return std::vector<std::pair<std::string, int>>();
+	const char* sql = "SELECT country, COUNT(*) as cnt "
+		"FROM geo_records "
+		"GROUP BY country "
+		"ORDER BY cnt DESC "
+		"LIMIT ?;";
+		
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
+	sqlite3_bind_int(stmt, 1, limit);
+
+	std::vector<std::pair<std::string, int>> results;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		std::string country = (const char*)sqlite3_column_text(stmt, 0);
+		int count = sqlite3_column_int(stmt, 1);
+		results.emplace_back(country, count);
+	}
+
+	sqlite3_finalize(stmt);
+	return results;
 }
 
 void SQLiteDatabase::initSchema()
