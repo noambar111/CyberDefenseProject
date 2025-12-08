@@ -57,7 +57,9 @@ std::optional<std::string> SQLiteDatabase::getCountryByIP(const std::string& ip)
 
 std::vector<std::string> SQLiteDatabase::getIPsByCountry(const std::string& country)
 {
-	return std::vector<std::string>();
+	const char* sql = "SELECT ip FROM geo_records WHERE country = ? ORDER BY id DESC;";
+	sqlite3_stmt* stmt;
+	sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
 }
 
 std::vector<std::pair<std::string, int>> SQLiteDatabase::getTopCountries(int limit)
