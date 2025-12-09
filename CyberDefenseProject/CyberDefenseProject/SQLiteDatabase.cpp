@@ -21,7 +21,7 @@ SQLiteDatabase::~SQLiteDatabase()
 
 bool SQLiteDatabase::saveGeo(const GeoRecord& rec)
 {
-	const char* sql = "INSTERT INTO geo_records (ip, country) VALUES (?, ?);";
+	const char* sql = "INSERT INTO geo_records (ip, country) VALUES (?, ?);";
 
 	sqlite3_stmt* stmt = nullptr;
 	sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);

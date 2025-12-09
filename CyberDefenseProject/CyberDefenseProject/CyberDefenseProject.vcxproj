@@ -132,6 +132,7 @@
     <ClInclude Include="DatabaseManager.h" />
     <ClInclude Include="GeoIPHandler.h" />
     <ClInclude Include="IDatabase.h" />
+    <ClInclude Include="InsertGeoHandler.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="IHandler.h" />
     <ClInclude Include="IPDatabase.h" />
@@ -148,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="DatabaseManager.cpp" />
     <ClCompile Include="GeoIPHandler.cpp" />
+    <ClCompile Include="InsertGeoHandler.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="IPsByCountryHandler.cpp" />
     <ClCompile Include="main.cpp" />
@@ -156,7 +158,9 @@
     <ClCompile Include="ResponseBuilder.cpp" />
     <ClCompile Include="Router.cpp" />
     <ClCompile Include="Server.cpp" />
-    <ClCompile Include="sqlite3.c" />
+    <ClCompile Include="sqlite3.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="SQLiteDatabase.cpp" />
     <ClCompile Include="TopCountriesHandler.cpp" />
   </ItemGroup>

@@ -3,12 +3,14 @@
 #include "GeoIpHandler.h"
 #include "IPsByCountryHandler.h"
 #include "TopCountriesHandler.h"
+#include "InsertGeoHandler.h"
 
 Router::Router()
 {
 	addRoute("/geo", std::make_unique<GepIPHandler>());
 	addRoute("/countries_to_ip", std::make_unique<IPsByCountryHandler>());
 	addRoute("/top_countries", std::make_unique<TopCountriesHandler>());
+	addRoute("/add_rec", std::make_unique<InsertGeoHandler>());
 }
 
 void Router::addRoute(const std::string& path, std::unique_ptr<IHandler> handler)
