@@ -23,5 +23,5 @@ std::vector<std::string> DatabaseManager::getIPsByCountry(const std::string& cou
 
 std::vector<std::pair<std::string, int>> DatabaseManager::getTopCountries(int limit)
 {
-    return this->getTopCountries(limit);
+    return this->m_db->getTopCountries(limit);
 }

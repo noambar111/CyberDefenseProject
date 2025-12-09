@@ -144,6 +144,7 @@
     <ClInclude Include="Server.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="SQLiteDatabase.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TopCountriesHandler.h" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/wd4996 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="SQLiteDatabase.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="TopCountriesHandler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
