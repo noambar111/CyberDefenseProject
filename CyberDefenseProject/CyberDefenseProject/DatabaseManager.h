@@ -13,11 +13,11 @@ public:
     std::optional<std::string> getCountryByIP(const std::string& ip);
     bool saveGeo(const GeoRecord& rec);
     std::vector<std::string> getIPsByCountry(const std::string& country);
-    std::vector<std::pair<std::string, int>> getTopCountries();
+    std::vector<std::pair<std::string, int>> getTopCountries(int limit);
 
 private:
-    DatabaseManager() : m_db(std::make_unique<SQLiteDatabase>("geo.db");
+    std::unique_ptr<IDatabase> m_db;
+    DatabaseManager() : m_db(std::make_unique<SQLiteDatabase>("geo.db")) {} ;
     DatabaseManager(const DatabaseManager&) = delete;
     DatabaseManager& operator=(const DatabaseManager&) = delete;
-    std::unique_ptr<IDatabase> m_db;
 };

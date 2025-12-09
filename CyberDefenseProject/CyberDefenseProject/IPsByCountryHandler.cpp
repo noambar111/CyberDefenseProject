@@ -1,5 +1,6 @@
 #include "IPsByCountryHandler.h"
 #include "ResponseBuilder.h"
+#include "DatabaseManager.h"
 
 Response IPsByCountryHandler::handle(const Request& req)
 {
@@ -13,8 +14,10 @@ Response IPsByCountryHandler::handle(const Request& req)
     }
 
     const std::string& country = it->second;
+    auto ips = DatabaseManager::getInstance().getIPsByCountry(country);
 
-    if (countryToIps.find(country) == countryToIps.end())
+
+    if (!ips.size())
     {
         return ResponseBuilder()
         .setStatus(200)
@@ -23,7 +26,7 @@ Response IPsByCountryHandler::handle(const Request& req)
     }
 
     std::string body = "[";
-    for (const auto& ip : countryToIps[country])
+    for (const auto& ip : ips)
     {
         body += "\"" + ip + "\",";
     }

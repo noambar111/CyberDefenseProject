@@ -1,18 +1,37 @@
 #include "TopCountriesHandler.h"
 #include "ResponseBuilder.h"
+#include "DatabaseManager.h"
 
 Response TopCountriesHandler::handle(const Request& req)
 {
-    std::string json =
-        R"({
-            "top_countries": [
-                { "country": "USA", "count": 120 },
-                { "country": "Germany", "count": 85 },
-                { "country": "Israel", "count": 52 },
-                { "country": "France", "count": 30 },
-                { "country": "UK", "count": 21 }
-            ]
-        })";
+    int limit = 5;
+    auto it = req.params().find("limit");
+    if (it != req.params().end())
+    {
+        try
+        {
+            limit = std::stoi(it->second);
+        }
+        catch (...)
+        {
+            limit = 5;
+        }
+    }
+
+    auto top = DatabaseManager::getInstance().getTopCountries(limit);
+    std::string json = "{ \"top_countries\": [";
+
+    for (const auto& [country, count] : top)
+    {
+        json += "{ \"country\": \"" + country + "\", \"count\": " + std::to_string(count) + " },";
+    }
+
+
+    if (!top.empty()) json.pop_back(); 
+
+    json += "] }";
+    
+
     return ResponseBuilder()
         .setStatus(200)
         .addHeader("Content-Type", "application/json")

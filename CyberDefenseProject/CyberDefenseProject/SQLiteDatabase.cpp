@@ -60,8 +60,15 @@ std::vector<std::string> SQLiteDatabase::getIPsByCountry(const std::string& coun
 	const char* sql = "SELECT ip FROM geo_records WHERE country = ? ORDER BY id DESC;";
 	sqlite3_stmt* stmt;
 	sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr);
-	sqlite3_bind_text(stmt, 1, country.c_str(), -1, SQLITE_TRANSIENT);
 	std::vector<std::string> results;
+
+	if (sqlite3_prepare_v2(m_db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+	{
+		Logger::getInstance().log(LogLevel::ERROR_LOG, "Failed to prepare statement in getIPsByCountry");
+		return results;
+	}
+
+	sqlite3_bind_text(stmt, 1, country.c_str(), -1, SQLITE_TRANSIENT);
 
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 	{
@@ -104,7 +111,8 @@ void SQLiteDatabase::initSchema()
 		"CREATE TABLE IF NOT EXISTS geo_records ("
 		"id INTEGER  PRIMARY KEY AUTOINCREMENT, "
 		"ip TEXT NOT NULL, "
-		"timestamp DATETIME FEDUALT CURRENT_TIMESTAMP"
+		"country TEXT NOT NULL, "
+		"timestamp DATETIME DEFAULT CURRENT_TIMESTAMP"
 		");";
 
 	char* errMsg = nullptr;

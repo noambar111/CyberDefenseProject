@@ -1,5 +1,6 @@
 #include "GeoIPHandler.h"
 #include "ResponseBuilder.h"
+#include "DatabaseManager.h"
 
 Response GepIPHandler::handle(const Request& req)
 {
@@ -13,13 +14,11 @@ Response GepIPHandler::handle(const Request& req)
     }
 
     std::string ip = it->second;
-    std::string country;
+    auto country = DatabaseManager::getInstance().getCountryByIP(ip);
 
-    if (ip == "1.1.1.1") country = "US";
-    else if (ip == "8.8.8.8") country = "Global";
-    else country = "Unknown";
+    std::string countryStr = country.value_or("Unknown");
 
-    std::string json = "{ \"ip\": \"" + ip + "\", \"country\": \"" + country + "\" }";
+    std::string json = "{ \"ip\": \"" + ip + "\", \"country\": \"" + countryStr + "\" }";
 
     return  ResponseBuilder()
         .setStatus(200)
