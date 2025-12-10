@@ -1,0 +1,33 @@
+#include "Router.h"
+#include "ResponseBuilder.h"
+#include "GeoIpHandler.h"
+#include "IPsByCountryHandler.h"
+#include "TopCountriesHandler.h"
+#include "InsertGeoHandler.h"
+
+Router::Router()
+{
+	addRoute("/geo", std::make_unique<GepIPHandler>());
+	addRoute("/countries_to_ip", std::make_unique<IPsByCountryHandler>());
+	addRoute("/top_countries", std::make_unique<TopCountriesHandler>());
+	addRoute("/add_rec", std::make_unique<InsertGeoHandler>());
+}
+
+void Router::addRoute(const std::string& path, std::unique_ptr<IHandler> handler)
+{
+	m_routes[path] = std::move(handler);
+}
+
+Response Router::route(const Request& req)
+{
+	auto it = m_routes.find(req.path());
+	if (it != m_routes.end())
+	{
+		return it->second->handle(req);
+	}
+
+	return ResponseBuilder()
+		.setStatus(404)
+		.setBody("Not Found")
+		.build();
+}
