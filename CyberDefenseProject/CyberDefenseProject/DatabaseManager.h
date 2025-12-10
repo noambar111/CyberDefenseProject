@@ -17,6 +17,7 @@ public:
 
 private:
     std::unique_ptr<IDatabase> m_db;
+    std::mutex m_lock;
     DatabaseManager() : m_db(std::make_unique<SQLiteDatabase>("geo.db")) {} ;
     DatabaseManager(const DatabaseManager&) = delete;
     DatabaseManager& operator=(const DatabaseManager&) = delete;

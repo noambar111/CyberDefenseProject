@@ -64,8 +64,11 @@ void Server::start()
         else
         {
             Logger::getInstance().log(LogLevel::INFO_LOG, "Client connected");
-            handleClient(client);
-            closesocket(client);
+            m_pool.enqueue([this, client]()
+                {
+                    this->handleClient(client);
+                    closesocket(client);
+                });
         }
     }
 

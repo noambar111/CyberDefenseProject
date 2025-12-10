@@ -26,6 +26,7 @@ void Logger::log(LogLevel level, const std::string& message)
         m_file.open("server.log", std::ios::app);
     }
 
+    std::lock_guard<std::mutex> lock(m_lock);
     m_file << line << std::endl;
 }
 
