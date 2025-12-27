@@ -2,6 +2,6 @@
 
 int main()
 {
-	Server s(99);
+	Server s(3000);
 	s.start();
 }

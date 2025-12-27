@@ -128,11 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AttackCLI.h" />
+    <ClInclude Include="HttpClient.h" />
     <ClInclude Include="IAttack.h" />
     <ClInclude Include="UrlBruteforceAttack.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AttackCLI.cpp" />
+    <ClCompile Include="HttpClient.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="UrlBruteforceAttack.cpp" />
   </ItemGroup>
