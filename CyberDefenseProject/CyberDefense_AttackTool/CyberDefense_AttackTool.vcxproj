@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AttackCLI.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="UrlBruteforceAttack.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
