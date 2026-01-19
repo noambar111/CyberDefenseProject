@@ -16,19 +16,22 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
 {
     std::cout << "[UrlBruteforceAttack] Attacking " << config.host << ":" << config.port << "\n";
 
-    HttpClient client(config.host, config.port);
-
-    if (!client.connectToServer())
-    {
-        std::cerr << "Failed to connect to server\n";
-        return;
-    }
-
     for (const auto& path : m_paths)
     {
+        HttpClient client(config.host, config.port);
+
+        if (!client.connectToServer())
+        {
+            std::cerr << "Failed to connect to server\n";
+            return;
+        }
+
         std::cout << "sending GET " << path << std::endl;
         client.sendGet(path);
+        std::string response = client.receiveResponse();
+        std::cout << "Response:\n" << response << "\n";
+
+        client.close();
     }
-    client.close();
     std::cout << "[UrlBruteforceAttack] Finished.\n";
 }

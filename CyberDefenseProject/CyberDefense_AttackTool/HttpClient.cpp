@@ -57,6 +57,28 @@ bool HttpClient::sendGet(const std::string& path)
 	return true;
 }
 
+std::string HttpClient::receiveResponse()
+{
+	char buffer[4096];
+	int received = recv(m_socket, buffer, sizeof(buffer) - 1, 0);
+
+	if (received == SOCKET_ERROR)
+	{
+		std::cerr << "recv() failed, error = "
+			<< WSAGetLastError() << std::endl;
+		return "";
+	}
+
+	if (received == 0)
+	{
+		std::cerr << "Server closed connection\n";
+		return "";
+	}
+
+	buffer[received] = '\0';
+	return std::string(buffer);
+}
+
 void HttpClient::close()
 {
 	if (m_socket != INVALID_SOCKET)
