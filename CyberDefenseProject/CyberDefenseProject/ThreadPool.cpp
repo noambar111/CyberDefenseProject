@@ -1,4 +1,5 @@
 #include "ThreadPool.h"
+#include "ThreadPool.h"
 
 ThreadPool::ThreadPool(int num)
 {
@@ -6,6 +7,7 @@ ThreadPool::ThreadPool(int num)
 	for (int i = 0; i < num; i++)
 		m_worker.emplace_back(&ThreadPool::workerLoop, this);	
 }
+
 
 ThreadPool::~ThreadPool()
 {
