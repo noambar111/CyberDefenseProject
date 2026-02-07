@@ -2,6 +2,7 @@
 #include "HttpClient.h"
 #include <chrono>
 #include <thread>
+#include "AttackThreadPool.h"
 
 UrlBruteforceAttack::UrlBruteforceAttack()
 {
@@ -25,9 +26,18 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
     const auto endTime = clock::now() + std::chrono::seconds(duration);
     auto nextTick = clock::now();
 
-    size_t sent = 0;
-    size_t ok = 0;
-    size_t fail = 0;
+    size_t threadCount = std::thread::hardware_concurrency();
+    if (threadCount == 0) threadCount = 8;
+
+    AttackThreadPool pool(threadCount);
+
+    std::atomic<size_t> sent{ 0 }, ok{ 0 }, fail{ 0 };
+
+    std::atomic<size_t> pending{ 0 };
+    std::mutex doneMtx;
+    std::condition_variable doneCv;
+
+
     size_t idx = 0;
 
     std::cout << "[UrlBruteforceAttack] Attacking " << config.host << ":" << config.port << " for" << duration << "s @ " << rps << " RPS\n";
@@ -35,10 +45,12 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
     while (clock::now() < endTime)
     {
         nextTick += interval;
-        const std::string& path = m_paths[idx++ % m_paths.size()];
+        const std::string path = m_paths[idx++ % m_paths.size()];
+        pending.fetch_add(1, std::memory_order_relaxed);
+        pool.enqueue([&, path]() {
+            bool success = true;
 
         HttpClient client(config.host, config.port);
-        bool success = true;
         if (!client.connectToServer())
         {
             success = false;
@@ -50,22 +62,30 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
         else
         {
             std::string response = client.receiveResponse();
-            if (response.empty())
-                success = false;
+            if (response.empty()) success = false;
         }
 
         client.close();
 
-        sent++;
-        if (success) ok++;
-        else fail++;
+        sent.fetch_add(1, std::memory_order_relaxed);
+        if (success) ok.fetch_add(1, std::memory_order_relaxed);
+        else fail.fetch_add(1, std::memory_order_relaxed);
 
-        if (sent % 100 == 0)
+        if (pending.fetch_sub(1, std::memory_order_relaxed) == 1)
         {
-            std::cout << "sent=" << sent << " ok=" << ok << " fail=" << fail << "\n";
+            std::lock_guard<std::mutex> lg(doneMtx);
+            doneCv.notify_one();
         }
 
+            });
         std::this_thread::sleep_until(nextTick);
+    }
+
+    {
+        std::unique_lock<std::mutex> ul(doneMtx);
+        doneCv.wait(ul, [&] {
+            return pending.load(std::memory_order_relaxed) == 0;
+            });
     }
 
     std::cout << "[UrlBruteforceAttack] Finished.\n";
