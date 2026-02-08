@@ -23,7 +23,8 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
     const int duration = (config.durationSeconds <= 0) ? 1 : config.durationSeconds;
 
     const auto interval = std::chrono::microseconds(1000000 / rps);
-    const auto endTime = clock::now() + std::chrono::seconds(duration);
+    auto tStart = clock::now();
+    const auto endTime = tStart + std::chrono::seconds(duration);
     auto nextTick = clock::now();
 
     size_t threadCount = std::thread::hardware_concurrency();
@@ -40,8 +41,14 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
 
     size_t idx = 0;
 
-    std::cout << "[UrlBruteforceAttack] Attacking " << config.host << ":" << config.port << " for" << duration << "s @ " << rps << " RPS\n";
+    auto toMs = [](auto d) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+    };
 
+    std::cout << "[UrlBruteforceAttack] START at t=0ms"
+        << " duration=" << duration << "s"
+        << " target=" << config.host << ":" << config.port
+        << " rps=" << rps << "\n";
     while (clock::now() < endTime)
     {
         nextTick += interval;
@@ -81,12 +88,26 @@ void UrlBruteforceAttack::run(const AttackConfig& config)
         std::this_thread::sleep_until(nextTick);
     }
 
+    auto tScheduleEnd = clock::now();
+    std::cout << "[UrlBruteforceAttack] SCHEDULING ENDED at "
+        << toMs(tScheduleEnd - tStart) << "ms"
+        << " (expected ~" << (duration * 1000) << "ms)"
+        << " pending=" << pending.load() << "\n";
+
     {
         std::unique_lock<std::mutex> ul(doneMtx);
         doneCv.wait(ul, [&] {
             return pending.load(std::memory_order_relaxed) == 0;
             });
     }
+
+    auto tDone = clock::now();
+    std::cout << "[UrlBruteforceAttack] DONE at "
+        << toMs(tDone - tStart) << "ms"
+        << " totalDone=" << sent.load()
+        << " ok=" << ok.load()
+        << " fail=" << fail.load()
+        << " pending=" << pending.load() << "\n";
 
     std::cout << "[UrlBruteforceAttack] Finished.\n";
 }

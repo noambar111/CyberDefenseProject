@@ -63,12 +63,17 @@ void Server::start()
         }
         else
         {
-            Logger::getInstance().log(LogLevel::INFO_LOG, "Client connected");
-            m_pool.enqueue([this, client]()
-                {
-                    this->handleClient(client);
-                    closesocket(client);
-                });
+            //Logger::getInstance().log(LogLevel::INFO_LOG, "Client connected");
+            //m_pool.enqueue([this, client]()
+            //    {
+            //        this->handleClient(client);
+            //        closesocket(client);
+            //    });
+
+            std::thread([this, client]() {
+                this->handleClient(client);
+            closesocket(client);
+                }).detach();
         }
     }
 

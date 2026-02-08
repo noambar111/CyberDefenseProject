@@ -8,13 +8,6 @@ HttpClient::~HttpClient()
 
 bool HttpClient::connectToServer()
 {
-	WSADATA wsa;
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-	{
-		std::cerr << "WSAStartup failed\n";
-		return false;
-	}
-	m_initialized = true;
 	m_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (m_socket == INVALID_SOCKET)
 	{
