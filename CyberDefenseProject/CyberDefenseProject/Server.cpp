@@ -65,14 +65,23 @@ void Server::start()
             long long route = m_totalRouteTimeMs.load(std::memory_order_relaxed);
             long long processing = m_totalProcessingTimeMs.load(std::memory_order_relaxed);
             long long total = m_totalTotalTimeMs.load(std::memory_order_relaxed);
+            long long recv = m_totalRecvTimeMs.exchange(0, std::memory_order_relaxed);
+            long long parse = m_totalParseTimeMs.exchange(0, std::memory_order_relaxed);
+            long long rroute = m_totalRouteTimeMs.exchange(0, std::memory_order_relaxed);
+            long long serialize = m_totalSerializeTimeMs.exchange(0, std::memory_order_relaxed);
+            long long send = m_totalSendTimeMs.exchange(0, std::memory_order_relaxed);
 
-            std::cout << "\n=== SERVER STATS ===\n";
+            std::cout << "\n=== SERVER STATS (last 2s) ===\n";
             std::cout << "requests=" << req << "\n";
             std::cout << "avgQueue=" << (queue / req) << " ms\n";
-            std::cout << "avgRoute=" << (route / req) << " ms\n";
+            std::cout << "avgRecv=" << (recv / req) << " ms\n";
+            std::cout << "avgParse=" << (parse / req) << " ms\n";
+            std::cout << "avgRoute=" << (rroute / req) << " ms\n";
+            std::cout << "avgSerialize=" << (serialize / req) << " ms\n";
+            std::cout << "avgSend=" << (send / req) << " ms\n";
             std::cout << "avgProcessing=" << (processing / req) << " ms\n";
             std::cout << "avgTotal=" << (total / req) << " ms\n";
-            std::cout << "====================\n";
+            std::cout << "==============================\n";
         }
         }).detach();
 
@@ -111,19 +120,28 @@ void Server::handleClient(int clientSocket, std::chrono::steady_clock::time_poin
     auto queueTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(workerStart - acceptedAt).count();
 
     char buf[LEN] = { 0 };
+
+    auto recvStart = clock::now();
     int bytesReceived = recv(clientSocket, buf, LEN, 0);
+    auto recvEnd = clock::now();
+
+    auto recvTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(recvEnd - recvStart).count();
 
     if (bytesReceived <= 0)
     {
-        Logger::getInstance().log(
-            LogLevel::ERROR_LOG,
-            "recv failed or client disconnected"
-        );
+        //Logger::getInstance().log(
+        //    LogLevel::ERROR_LOG,
+        //    "recv failed or client disconnected"
+        //);
         closesocket(clientSocket);
         return;
     }
 
+    auto parseStart = clock::now();
     Request req(std::string(buf, bytesReceived));
+    auto parseEnd = clock::now();
+
+    auto parseTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(parseEnd - parseStart).count();
 
     auto routeStart = clock::now();
     Response res = m_router.route(req);
@@ -131,14 +149,22 @@ void Server::handleClient(int clientSocket, std::chrono::steady_clock::time_poin
 
     auto routeTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(routeEnd - routeStart).count();
 
+    auto serializeStart = clock::now();
     std::string responseStr = res.toString();
+    auto serializeEnd = clock::now();
 
-    Logger::getInstance().log(
-        LogLevel::INFO_LOG,
-        "Response sent to client (" + std::to_string(responseStr.size()) + " bytes)"
-    );
+    auto serializeTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(serializeEnd - serializeStart).count();
 
+    //Logger::getInstance().log(
+    //    LogLevel::INFO_LOG,
+    //    "Response sent to client (" + std::to_string(responseStr.size()) + " bytes)"
+    //);
+
+    auto sendStart = clock::now();
     send(clientSocket, responseStr.c_str(), static_cast<int>(responseStr.size()), 0);
+    auto sendEnd = clock::now();
+
+    auto sendTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(sendEnd - sendStart).count();
 
     auto finishedAt = clock::now();
 
@@ -147,7 +173,11 @@ void Server::handleClient(int clientSocket, std::chrono::steady_clock::time_poin
 
     m_totalRequests.fetch_add(1, std::memory_order_relaxed);
     m_totalQueueTimeMs.fetch_add(queueTimeMs, std::memory_order_relaxed);
+    m_totalRecvTimeMs.fetch_add(recvTimeMs, std::memory_order_relaxed);
+    m_totalParseTimeMs.fetch_add(parseTimeMs, std::memory_order_relaxed);
     m_totalRouteTimeMs.fetch_add(routeTimeMs, std::memory_order_relaxed);
+    m_totalSerializeTimeMs.fetch_add(serializeTimeMs, std::memory_order_relaxed);
+    m_totalSendTimeMs.fetch_add(sendTimeMs, std::memory_order_relaxed);
     m_totalProcessingTimeMs.fetch_add(processingTimeMs, std::memory_order_relaxed);
     m_totalTotalTimeMs.fetch_add(totalTimeMs, std::memory_order_relaxed);
 

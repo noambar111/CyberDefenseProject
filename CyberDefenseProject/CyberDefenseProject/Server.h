@@ -21,5 +21,9 @@ private:
     std::atomic<long long> m_totalRouteTimeMs{ 0 };
     std::atomic<long long> m_totalProcessingTimeMs{ 0 };
     std::atomic<long long> m_totalTotalTimeMs{ 0 };
+    std::atomic<long long> m_totalRecvTimeMs{ 0 };
+    std::atomic<long long> m_totalParseTimeMs{ 0 };
+    std::atomic<long long> m_totalSerializeTimeMs{ 0 };
+    std::atomic<long long> m_totalSendTimeMs{ 0 };
 
 };
