@@ -16,14 +16,21 @@ private:
     SOCKET m_serverSocket;
     Router m_router;
     ThreadPool m_pool;
-    std::atomic<size_t> m_totalRequests{ 0 };
-    std::atomic<long long> m_totalQueueTimeMs{ 0 };
-    std::atomic<long long> m_totalRouteTimeMs{ 0 };
-    std::atomic<long long> m_totalProcessingTimeMs{ 0 };
-    std::atomic<long long> m_totalTotalTimeMs{ 0 };
-    std::atomic<long long> m_totalRecvTimeMs{ 0 };
-    std::atomic<long long> m_totalParseTimeMs{ 0 };
-    std::atomic<long long> m_totalSerializeTimeMs{ 0 };
-    std::atomic<long long> m_totalSendTimeMs{ 0 };
+
+    std::atomic<long long> m_totalAccepted{ 0 };
+    std::atomic<long long> m_totalEnqueued{ 0 };
+    std::atomic<long long> m_totalStarted{ 0 };
+    std::atomic<long long> m_totalCompleted{ 0 };
+
+    std::atomic<long long> m_activeWorkers{ 0 };
+
+    std::atomic<long long> m_totalQueueTimeUs{ 0 };
+    std::atomic<long long> m_totalRecvTimeUs{ 0 };
+    std::atomic<long long> m_totalParseTimeUs{ 0 };
+    std::atomic<long long> m_totalRouteTimeUs{ 0 };
+    std::atomic<long long> m_totalSerializeTimeUs{ 0 };
+    std::atomic<long long> m_totalSendTimeUs{ 0 };
+    std::atomic<long long> m_totalProcessingTimeUs{ 0 };
+    std::atomic<long long> m_totalTotalTimeUs{ 0 };
 
 };

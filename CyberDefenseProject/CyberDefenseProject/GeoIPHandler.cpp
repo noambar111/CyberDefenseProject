@@ -18,6 +18,8 @@ Response GepIPHandler::handle(const Request& req)
 
     std::string countryStr = country.value_or("Unknown");
 
+    //std::string countryStr = "test";
+
     std::string json = "{ \"ip\": \"" + ip + "\", \"country\": \"" + countryStr + "\" }";
 
     return  ResponseBuilder()

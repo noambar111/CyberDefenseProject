@@ -15,9 +15,9 @@ Response InsertGeoHandler::handle(const Request& req)
             .build();
     }
 
-    //GeoRecord rec{ params.at("ip"), params.at("country") };
- //   bool ok = DatabaseManager::getInstance().saveGeo(rec);
-    bool ok = true;
+    GeoRecord rec{ params.at("ip"), params.at("country") };
+   bool ok = DatabaseManager::getInstance().saveGeo(rec);
+ 
 
     if (!ok)
     {

@@ -9,8 +9,8 @@
 
 void Server::start()
 {
-	WSADATA wsaData;
-	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    WSADATA wsaData;
+    int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     if (result != 0)
     {
@@ -53,71 +53,90 @@ void Server::start()
     std::cout << "Server is running on port " << m_port << "..." << std::endl;
     Logger::getInstance().log(LogLevel::INFO_LOG, "Server starting on port " + std::to_string(m_port));
 
-    std::thread([this]() {
-        while (true)
+    std::thread([this]()
         {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            while (true)
+            {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
 
-            size_t req = m_totalRequests.load(std::memory_order_relaxed);
-            if (req == 0) continue;
+                long long accepted = m_totalAccepted.exchange(0, std::memory_order_relaxed);
+                long long enqueued = m_totalEnqueued.exchange(0, std::memory_order_relaxed);
+                long long started = m_totalStarted.exchange(0, std::memory_order_relaxed);
+                long long completed = m_totalCompleted.exchange(0, std::memory_order_relaxed);
 
-            long long queue = m_totalQueueTimeMs.load(std::memory_order_relaxed);
-            long long route = m_totalRouteTimeMs.load(std::memory_order_relaxed);
-            long long processing = m_totalProcessingTimeMs.load(std::memory_order_relaxed);
-            long long total = m_totalTotalTimeMs.load(std::memory_order_relaxed);
-            long long recv = m_totalRecvTimeMs.exchange(0, std::memory_order_relaxed);
-            long long parse = m_totalParseTimeMs.exchange(0, std::memory_order_relaxed);
-            long long rroute = m_totalRouteTimeMs.exchange(0, std::memory_order_relaxed);
-            long long serialize = m_totalSerializeTimeMs.exchange(0, std::memory_order_relaxed);
-            long long send = m_totalSendTimeMs.exchange(0, std::memory_order_relaxed);
+                long long queueUs = m_totalQueueTimeUs.exchange(0, std::memory_order_relaxed);
+                long long recvUs = m_totalRecvTimeUs.exchange(0, std::memory_order_relaxed);
+                long long parseUs = m_totalParseTimeUs.exchange(0, std::memory_order_relaxed);
+                long long routeUs = m_totalRouteTimeUs.exchange(0, std::memory_order_relaxed);
+                long long serializeUs = m_totalSerializeTimeUs.exchange(0, std::memory_order_relaxed);
+                long long sendUs = m_totalSendTimeUs.exchange(0, std::memory_order_relaxed);
+                long long processingUs = m_totalProcessingTimeUs.exchange(0, std::memory_order_relaxed);
+                long long totalUs = m_totalTotalTimeUs.exchange(0, std::memory_order_relaxed);
 
-            std::cout << "\n=== SERVER STATS (last 2s) ===\n";
-            std::cout << "requests=" << req << "\n";
-            std::cout << "avgQueue=" << (queue / req) << " ms\n";
-            std::cout << "avgRecv=" << (recv / req) << " ms\n";
-            std::cout << "avgParse=" << (parse / req) << " ms\n";
-            std::cout << "avgRoute=" << (rroute / req) << " ms\n";
-            std::cout << "avgSerialize=" << (serialize / req) << " ms\n";
-            std::cout << "avgSend=" << (send / req) << " ms\n";
-            std::cout << "avgProcessing=" << (processing / req) << " ms\n";
-            std::cout << "avgTotal=" << (total / req) << " ms\n";
-            std::cout << "==============================\n";
-        }
+                long long activeNow = m_activeWorkers.load(std::memory_order_relaxed);
+                size_t poolQueueNow = m_pool.getQueueSize();
+
+                std::cout << "\n=== SERVER STATS (last 2s) ===\n";
+                std::cout << "accepted=" << accepted << "\n";
+                std::cout << "enqueued=" << enqueued << "\n";
+                std::cout << "started=" << started << "\n";
+                std::cout << "completed=" << completed << "\n";
+                std::cout << "activeWorkers(now)=" << activeNow << "\n";
+                std::cout << "poolQueueSize(now)=" << poolQueueNow << "\n";
+
+                if (completed > 0)
+                {
+                    std::cout << "avgQueue=" << (queueUs / completed) << " us\n";
+                    std::cout << "avgRecv=" << (recvUs / completed) << " us\n";
+                    std::cout << "avgParse=" << (parseUs / completed) << " us\n";
+                    std::cout << "avgRoute=" << (routeUs / completed) << " us\n";
+                    std::cout << "avgSerialize=" << (serializeUs / completed) << " us\n";
+                    std::cout << "avgSend=" << (sendUs / completed) << " us\n";
+                    std::cout << "avgProcessing=" << (processingUs / completed) << " us\n";
+                    std::cout << "avgTotal=" << (totalUs / completed) << " us\n";
+                }
+                else
+                {
+                    std::cout << "No completed requests in this window.\n";
+                }
+
+                std::cout << "==============================\n";
+            }
         }).detach();
 
-    while (true)
-    {
-        SOCKET client = accept(m_serverSocket, nullptr, nullptr);
-        if (client == INVALID_SOCKET)
+        while (true)
         {
-            std::cerr << "Accept failed. Error: " << WSAGetLastError() << std::endl;
-            continue;
-        }
-        else
-        {
+            SOCKET client = accept(m_serverSocket, nullptr, nullptr);
+            if (client == INVALID_SOCKET)
+            {
+                std::cerr << "Accept failed. Error: " << WSAGetLastError() << std::endl;
+                continue;
+            }
+
             auto acceptedAt = std::chrono::steady_clock::now();
+            m_totalAccepted.fetch_add(1, std::memory_order_relaxed);
+            m_totalEnqueued.fetch_add(1, std::memory_order_relaxed);
 
             m_pool.enqueue([this, client, acceptedAt]()
                 {
                     this->handleClient(client, acceptedAt);
                 });
-            //std::thread([this, client]() {
-            //    this->handleClient(client);
-            //closesocket(client);
-            //    }).detach();
         }
-    }
 
-    closesocket(m_serverSocket);
-    WSACleanup();
+        closesocket(m_serverSocket);
+        WSACleanup();
 }
 
 void Server::handleClient(int clientSocket, std::chrono::steady_clock::time_point acceptedAt)
 {
     using clock = std::chrono::steady_clock;
 
+    m_totalStarted.fetch_add(1, std::memory_order_relaxed);
+    m_activeWorkers.fetch_add(1, std::memory_order_relaxed);
+
     auto workerStart = clock::now();
-    auto queueTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(workerStart - acceptedAt).count();
+    auto queueTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(workerStart - acceptedAt).count();
 
     char buf[LEN] = { 0 };
 
@@ -125,15 +144,13 @@ void Server::handleClient(int clientSocket, std::chrono::steady_clock::time_poin
     int bytesReceived = recv(clientSocket, buf, LEN, 0);
     auto recvEnd = clock::now();
 
-    auto recvTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(recvEnd - recvStart).count();
+    auto recvTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(recvEnd - recvStart).count();
 
     if (bytesReceived <= 0)
     {
-        //Logger::getInstance().log(
-        //    LogLevel::ERROR_LOG,
-        //    "recv failed or client disconnected"
-        //);
         closesocket(clientSocket);
+        m_activeWorkers.fetch_sub(1, std::memory_order_relaxed);
         return;
     }
 
@@ -141,45 +158,53 @@ void Server::handleClient(int clientSocket, std::chrono::steady_clock::time_poin
     Request req(std::string(buf, bytesReceived));
     auto parseEnd = clock::now();
 
-    auto parseTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(parseEnd - parseStart).count();
+    auto parseTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(parseEnd - parseStart).count();
 
     auto routeStart = clock::now();
     Response res = m_router.route(req);
     auto routeEnd = clock::now();
 
-    auto routeTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(routeEnd - routeStart).count();
+    auto routeTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(routeEnd - routeStart).count();
 
     auto serializeStart = clock::now();
     std::string responseStr = res.toString();
     auto serializeEnd = clock::now();
 
-    auto serializeTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(serializeEnd - serializeStart).count();
-
-    //Logger::getInstance().log(
-    //    LogLevel::INFO_LOG,
-    //    "Response sent to client (" + std::to_string(responseStr.size()) + " bytes)"
-    //);
+    auto serializeTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(serializeEnd - serializeStart).count();
 
     auto sendStart = clock::now();
-    send(clientSocket, responseStr.c_str(), static_cast<int>(responseStr.size()), 0);
+    int sentBytes = send(clientSocket, responseStr.c_str(), static_cast<int>(responseStr.size()), 0);
     auto sendEnd = clock::now();
 
-    auto sendTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(sendEnd - sendStart).count();
+    auto sendTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(sendEnd - sendStart).count();
 
     auto finishedAt = clock::now();
 
-    auto processingTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(finishedAt - workerStart).count();
-    auto totalTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(finishedAt - acceptedAt).count();
+    auto processingTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(finishedAt - workerStart).count();
 
-    m_totalRequests.fetch_add(1, std::memory_order_relaxed);
-    m_totalQueueTimeMs.fetch_add(queueTimeMs, std::memory_order_relaxed);
-    m_totalRecvTimeMs.fetch_add(recvTimeMs, std::memory_order_relaxed);
-    m_totalParseTimeMs.fetch_add(parseTimeMs, std::memory_order_relaxed);
-    m_totalRouteTimeMs.fetch_add(routeTimeMs, std::memory_order_relaxed);
-    m_totalSerializeTimeMs.fetch_add(serializeTimeMs, std::memory_order_relaxed);
-    m_totalSendTimeMs.fetch_add(sendTimeMs, std::memory_order_relaxed);
-    m_totalProcessingTimeMs.fetch_add(processingTimeMs, std::memory_order_relaxed);
-    m_totalTotalTimeMs.fetch_add(totalTimeMs, std::memory_order_relaxed);
+    auto totalTimeUs =
+        std::chrono::duration_cast<std::chrono::microseconds>(finishedAt - acceptedAt).count();
+
+    m_totalQueueTimeUs.fetch_add(queueTimeUs, std::memory_order_relaxed);
+    m_totalRecvTimeUs.fetch_add(recvTimeUs, std::memory_order_relaxed);
+    m_totalParseTimeUs.fetch_add(parseTimeUs, std::memory_order_relaxed);
+    m_totalRouteTimeUs.fetch_add(routeTimeUs, std::memory_order_relaxed);
+    m_totalSerializeTimeUs.fetch_add(serializeTimeUs, std::memory_order_relaxed);
+    m_totalSendTimeUs.fetch_add(sendTimeUs, std::memory_order_relaxed);
+    m_totalProcessingTimeUs.fetch_add(processingTimeUs, std::memory_order_relaxed);
+    m_totalTotalTimeUs.fetch_add(totalTimeUs, std::memory_order_relaxed);
+
+    m_totalCompleted.fetch_add(1, std::memory_order_relaxed);
+
+    if (sentBytes == SOCKET_ERROR)
+    {
+    }
 
     closesocket(clientSocket);
+    m_activeWorkers.fetch_sub(1, std::memory_order_relaxed);
 }

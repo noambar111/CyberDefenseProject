@@ -14,8 +14,8 @@ Response IPsByCountryHandler::handle(const Request& req)
     }
 
     const std::string& country = it->second;
-    auto ips = DatabaseManager::getInstance().getIPsByCountry(country);
-
+    //auto ips = DatabaseManager::getInstance().getIPsByCountry(country);
+    std::vector<std::string> ips = { "a" };
 
     if (!ips.size())
     {

@@ -14,6 +14,11 @@ public:
 	void enqueue(std::function<void()> job);
 	ThreadPool(const ThreadPool&) = delete;
 	ThreadPool& operator=(const ThreadPool&) = delete;
+	size_t getQueueSize()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		return m_tasks.size();
+	}
 private:
 	void workerLoop();
 	std::vector<std::thread> m_worker;

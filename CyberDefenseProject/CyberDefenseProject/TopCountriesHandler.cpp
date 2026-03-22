@@ -18,7 +18,9 @@ Response TopCountriesHandler::handle(const Request& req)
         }
     }
 
-    auto top = DatabaseManager::getInstance().getTopCountries(limit);
+    ///auto top = DatabaseManager::getInstance().getTopCountries(limit);
+
+    std::vector<std::pair<std::string, int>> top = { {"a",5} };
     std::string json = "{ \"top_countries\": [";
 
     for (const auto& [country, count] : top)
